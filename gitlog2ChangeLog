@@ -1,0 +1,44 @@
+#!/usr/bin/awk -f
+/^COMMIT_DATE/ && long_desc != "" {
+  print long_desc
+}
+/^COMMIT_DATE/ {
+  in_files = 0
+  in_commit = 1
+  next
+}
+/^DESCRIPTION/ {
+  in_description = 1
+  in_commit = 0
+  next
+}
+in_commit == 1 {
+print sprintf("%s\n", $0)
+  next
+}
+/^LONG_DESCRIPTION/ {
+  in_description = 0
+  in_longdesc = 1
+  long_desc = ""
+  next
+}
+in_description == 1 {
+  print sprintf("\t%s\n", $0)
+  next
+}
+/^FILES/ {
+  in_longdesc = 0
+  in_files = 1
+  next
+}
+in_longdesc == 1 {
+  if (long_desc == "")
+    long_desc = sprintf("\t%s", $0)
+  else
+    long_desc = sprintf("%s\n\t%s", long_desc, $0)
+  next
+}
+in_files == 1 {
+  if ($0 != "")
+    print sprintf("\t* %s:", $0)
+}

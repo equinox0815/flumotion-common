@@ -5,6 +5,8 @@ EXTRA_DIST = \
 	as-ac-expand.m4		\
 	intltool.m4 		\
 	py-compile-destdir 	\
+	gitlog2ChangeLog 	\
+	changelog.mk 		\
 	common.mk 		\
 	epydoc.mk 		\
 	filterdoc.py 		\
