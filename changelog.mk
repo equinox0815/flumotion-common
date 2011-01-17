@@ -8,7 +8,7 @@ changelog:
                   --pretty=format:'COMMIT_DATE: %n%w(80)%ad  %an  <%ae>%n DESCRIPTION:%n %s%n LONG_DESCRIPTION:%n %b %n%nFILES:'\
                   --stat --name-only --date=short --after="$(GIT_LOG_START_DATE)" --topo-order) | \
                   $(top_srcdir)/common/gitlog2ChangeLog > ChangeLog.tmp \
-                && echo "\n" >> CangeLog.tmp \
+                && echo "\n" >> ChangeLog.tmp \
                 && cat $(top_srcdir)/ChangeLog.old >> ChangeLog.tmp \
                 && cp -f ChangeLog.tmp $(distdir)/ChangeLog \
                 || ( rm -f ChangeLog.tmp ; \
