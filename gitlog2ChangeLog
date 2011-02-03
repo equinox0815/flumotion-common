@@ -1,44 +1,78 @@
 #!/usr/bin/awk -f
-/^COMMIT_DATE/ && long_desc != "" {
-  print long_desc
+BEGIN {
+commit_msg = ""
+backport = ""
+reviewed = ""
+file_list = ""
+in_files = 0
+in_description = 0
+in_commit = 0
 }
-/^COMMIT_DATE/ {
+/^commit:/ {
   in_files = 0
   in_commit = 1
+  if (reviewed != "")
+    print reviewed
+  if (backport != "")
+    print backport
+  if (file_list != "")
+    print file_list
+  if (commit_msg != "")
+    print commit_msg
+
+  commit_msg = ""
+  backport = ""
+  reviewed = ""
+  file_list = ""
   next
 }
-/^DESCRIPTION/ {
+/^description:/ {
   in_description = 1
   in_commit = 0
   next
 }
-in_commit == 1 {
-print sprintf("%s\n", $0)
-  next
-}
-/^LONG_DESCRIPTION/ {
+/^files:/ {
   in_description = 0
-  in_longdesc = 1
-  long_desc = ""
-  next
-}
-in_description == 1 {
-  print sprintf("\t%s\n", $0)
-  next
-}
-/^FILES/ {
-  in_longdesc = 0
   in_files = 1
   next
 }
-in_longdesc == 1 {
-  if (long_desc == "")
-    long_desc = sprintf("\t%s", $0)
+in_commit == 1 {
+  print sprintf("%s\n", $0)
+  next
+}
+in_description == 1 {
+  if ($0 ~ /^Backport/) {
+    backport = sprintf("\t%s", $0)
+    next
+  }
+  if ($0 ~ /^reviewed by/) {
+    reviewed = sprintf("\t%s", $0)
+    next
+  }
+  if (commit_msg == "")
+    commit_msg = sprintf("\t%s\n", $0)
   else
-    long_desc = sprintf("%s\n\t%s", long_desc, $0)
+    commit_msg = sprintf("%s\t%s\n", commit_msg, $0)
   next
 }
 in_files == 1 {
   if ($0 != "")
-    print sprintf("\t* %s:", $0)
+    if (file_list == "")
+      if (reviewed || backport)
+        file_list = sprintf("\n\t* %s:", $0)
+      else
+        file_list = sprintf("\t* %s:", $0)
+    else
+      file_list = sprintf("%s\n\t* %s:", file_list, $0)
+  next
+}
+END {
+  if (reviewed != "")
+    print reviewed
+  if (backport != "")
+    print backport
+  if (file_list != "")
+    print file_list
+  if (commit_msg != "")
+    print commit_msg
 }
