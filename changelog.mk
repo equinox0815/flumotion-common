@@ -8,9 +8,9 @@ changelog:
                   --pretty=format:'commit:%n%ad  %an  <%ae>%ndescription:%n%s%n%bfiles:'\
                   --stat --name-only --date=short --topo-order $(GIT_LOG_START_COMMIT)..HEAD) | \
                   $(top_srcdir)/common/gitlog2ChangeLog > ChangeLog.tmp \
-                && echo "\n" >> ChangeLog.tmp \
                 && cat $(top_srcdir)/ChangeLog.old >> ChangeLog.tmp \
                 && cp -f ChangeLog.tmp $(distdir)/ChangeLog \
+                && rm -f ChangeLog.tmp \
                 || ( rm -f ChangeLog.tmp ; \
                      echo Failed to generate ChangeLog >&2 ); \
         else \
