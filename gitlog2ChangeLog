@@ -56,18 +56,18 @@ in_commit == 1 {
   next
 }
 in_description == 1 {
-  if ($0 ~ /^Backport/) {
+  if (/^[Bb]ackport/) {
     backport = sprintf("\t%s", $0)
     next
   }
-  if ($0 ~ /^reviewed by/) {
+  if (/^[Rr]eviewed by/) {
     reviewed = sprintf("\t%s", $0)
     next
   }
-  if (commit_msg == "")
-    commit_msg = sprintf("\t%s\n", $0)
-  else
+  if (commit_msg)
     commit_msg = sprintf("%s\t%s\n", commit_msg, $0)
+  else
+    commit_msg = sprintf("\t%s\n", $0)
   next
 }
 in_refs == 1 {
@@ -76,8 +76,8 @@ in_refs == 1 {
     release_tag = sprintf("=== release %s ===\n", substr($0, RSTART, RLENGTH))
 }
 in_files == 1 {
-  if ($0 != "")
-    if (file_list == "")
+  if ($0 && ! /ChangeLog/)
+    if (file_list)
       if (reviewed || backport)
         file_list = sprintf("\n\t* %s:", $0)
       else
