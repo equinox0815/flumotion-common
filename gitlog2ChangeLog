@@ -77,7 +77,7 @@ in_refs == 1 {
 }
 in_files == 1 {
   if ($0 && ! /ChangeLog/)
-    if (file_list)
+    if (!file_list)
       if (reviewed || backport)
         file_list = sprintf("\n\t* %s:", $0)
       else
