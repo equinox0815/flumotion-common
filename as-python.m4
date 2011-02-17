@@ -40,7 +40,7 @@ AC_DEFUN([AS_PATH_PYTHON],
 
   dnl should we do the version check?
   ifelse([$1],[],
-         [AC_PATH_PROG(PYTHON, python python2.5 python2.4 python2.3 python2.2)],
+         [AC_PATH_PROG(PYTHON, python python2.7 python2.6 python2.5 python2.4 python2.3 python2.2)],
          [
      AC_MSG_NOTICE(Looking for Python version >= $1)
     changequote(<<, >>)dnl
@@ -55,7 +55,7 @@ else:
     changequote([, ])dnl
 
     python_good=false
-    for python_candidate in python python2.5 python2.4 python2.3 python2.2; do
+    for python_candidate in python python2.7 python2.6 python2.5 python2.4 python2.3 python2.2; do
       unset PYTHON
       AC_PATH_PROG(PYTHON, $python_candidate) 1> /dev/null 2> /dev/null
 
