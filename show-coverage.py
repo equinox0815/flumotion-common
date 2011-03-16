@@ -49,8 +49,12 @@ class Coverage:
             print 'No coverage data'
             return
 
-        self.maxlen = max(map(lambda f: len(self._strip_filename(f)),
-                              self.files))
+        if self.files:
+            self.maxlen = max(map(lambda f: len(self._strip_filename(f)),
+                                  self.files))
+        else:
+            self.maxlen = 0
+
         print 'Coverage report:'
         print '-' * (self.maxlen + 23)
         for file in self.files:
