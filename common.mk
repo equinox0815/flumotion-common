@@ -48,7 +48,9 @@ dist-hook::
 
 release: dist
 	make $(PACKAGE)-$(VERSION).tar.bz2.md5
-	[ -r $(PACKAGE)-$(VERSION).tar.gz ] && make $(PACKAGE)-$(VERSION).tar.gz.md5
+	if test -r $(PACKAGE)-$(VERSION).tar.gz; then \
+	make $(PACKAGE)-$(VERSION).tar.gz.md5; \
+	fi
 
 # generate md5 sum files
 %.md5: %
