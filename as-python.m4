@@ -115,8 +115,9 @@ else:
   dnl then the old $(pythondir) was pretty useless.
 
   AC_SUBST(pythondir)
-  pythondir=$PYTHON_PREFIX"/lib/python"$PYTHON_VERSION/site-packages
-
+  PYLIB=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(prefix=''))" 2>/dev/null ||
+     echo "lib/python$PYTHON_VERSION/site-packages"`
+  pythondir=$PYTHON_PREFIX/$PYLIB
   dnl pkgpythondir -- $PACKAGE directory under pythondir.  Was
   dnl   PYTHON_SITE_PACKAGE in previous betas, but this naming is
   dnl   more consistent with the rest of automake.
@@ -129,7 +130,9 @@ else:
   dnl   (shared libraries)  Was PYTHON_SITE_EXEC in previous betas.
 
   AC_SUBST(pyexecdir)
-  pyexecdir=$PYTHON_EXEC_PREFIX"/lib/python"$PYTHON_VERSION/site-packages
+  PYLIB=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(prefix=''))" 2>/dev/null ||
+     echo "lib/python$PYTHON_VERSION/site-packages"`
+  pyexecdir=$PYTHON_EXEC_PREFIX/$PYLIB
 
   dnl pkgpyexecdir -- $(pyexecdir)/$(PACKAGE)
   dnl   Maybe this should be put in python.am?
