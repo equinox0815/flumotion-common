@@ -12,7 +12,11 @@ except ImportError:
 
 # we import docutils before installing the packager to prevent
 # messing with the datadir which causes epydoc to crash
-import docutils
+try:
+    import docutils
+except ImportError:
+    print "Not importing docutils"
+    pass
 
 from flumotion.common import boot
 boot.init_gobject()
