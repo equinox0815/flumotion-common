@@ -10,6 +10,10 @@ except ImportError:
     print "Not importing misc.setup"
     pass
 
+# we import docutils before installing the packager to prevent
+# messing with the datadir which causes epydoc to crash
+import docutils
+
 from flumotion.common import boot
 boot.init_gobject()
 boot.init_gst()
