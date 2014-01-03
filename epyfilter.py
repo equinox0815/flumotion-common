@@ -1,12 +1,13 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
-# this script filters output from gendoc according to regexps
+# this script filters output from epydoc and similar scripts
+# according to regexps.
+
 # It can't be done inside gendoc.py by replacing stderr, because epydoc
 # does stderr replacement of its own
 
 import re
-import StringIO
 
 # we filter out multi-line blocks by looking for start markers and
 # corresponding stop markers.
@@ -15,7 +16,9 @@ import StringIO
 # have multiple blocks that need filtering out.
 
 import sys
+
 debug = sys.stdout.write
+# comment this line if you want to see debug output
 debug = lambda x: x
 
 
@@ -33,6 +36,9 @@ class REO:
             self.reo = re.compile(pattern, self.flags)
         else:
             self.reo = None
+
+        # for debugging
+        self._pattern = pattern
 
 
 class Block(REO):
@@ -69,56 +75,6 @@ class Start(REO):
         self.stops.append(stop)
 
 
-starts = [
-    Start('^=+$', [
-        Stop('^$', [
-            Block('In gtk'),
-            Block('In gobject'),
-            Block('In __builtin__'),
-            # don't catch only /twisted/ since we have a twisted dir too
-            Block('.*/twisted/spread'),
-            Block('.*/twisted/trial'),
-        ])
-    ]),
-    Start('- TestResult', [
-        Stop('TestCase.run\)$', [
-            Block('from twisted.trial'),
-        ])
-    ]),
-    Start('.*\/ihooks.py.*DeprecationWarning: The sre module', [
-        Stop('.*return imp.load_source\(name, filename, file\)', [
-            Block(None),
-        ])
-    ]),
-    Start('.*epydoc\/uid.py:.*GtkDeprecationWarning', [
-        Stop('.*obj not in self._module.value', [
-            Block(None),
-        ])
-    ]),
-    Start('.* - twisted\.', [
-        Stop('.*\(base method=', [
-            Block(None),
-        ])
-    ]),
-    Start('.* - pb.BrokerFactory', [
-        Stop('.*\(from twisted.spread.flavors.Root.rootObject\)', [
-            Block(None),
-        ])
-    ]),
-    Start('.* - TestResult', [
-        Stop('.*\(from twisted.trial.unittest.TestCase.run\)', [
-            Block(None),
-        ])
-    ]),
-]
-
-singles = [
-    "^Warning: <type 'exceptions\.",
-    "^Warning: UID conflict detected: gobject",
-    "^Warning: UID conflict detected: __builtin__",
-    "^Warning: UID conflict detected: twisted",
-    ".*- pb.getObjectAt \(from twisted.spread.flavors.Root\)",
-    ".*- Deferred \(from twisted.trial.unittest.TestCase.run\)"]
 
 
 class Filter:
@@ -201,12 +157,79 @@ class Filter:
             self._stdout.flush()
             self._buffer = ''
 
-import sys
-f = Filter(sys.stdin, sys.stdout)
-for s in starts:
-    f.addStart(s)
-for s in singles:
-    reo = re.compile(s)
-    f.addRegExpObject(reo)
+def main():
 
-f.start()
+    # allow external python module to define/override starts and singles
+    global starts, singles
+    starts = None
+    singles = None
+
+    if len(sys.argv) > 1:
+        execfile(sys.argv[1])
+    else:
+        starts = [
+            Start('^=+$', [
+                Stop('^$', [
+                    Block('In gtk'),
+                    Block('In gobject'),
+                    Block('In __builtin__'),
+                    # don't catch only /twisted/ since we have a twisted dir too
+                    Block('.*/twisted/spread'),
+                    Block('.*/twisted/trial'),
+                ])
+            ]),
+            Start('- TestResult', [
+                Stop('TestCase.run\)$', [
+                    Block('from twisted.trial'),
+                ])
+            ]),
+            Start('.*\/ihooks.py.*DeprecationWarning: The sre module', [
+                Stop('.*return imp.load_source\(name, filename, file\)', [
+                    Block(None),
+                ])
+            ]),
+            Start('.*epydoc\/uid.py:.*GtkDeprecationWarning', [
+                Stop('.*obj not in self._module.value', [
+                    Block(None),
+                ])
+            ]),
+            Start('.* - twisted\.', [
+                Stop('.*\(base method=', [
+                    Block(None),
+                ])
+            ]),
+            Start('.* - pb.BrokerFactory', [
+                Stop('.*\(from twisted.spread.flavors.Root.rootObject\)', [
+                    Block(None),
+                ])
+            ]),
+            Start('.* - TestResult', [
+                Stop('.*\(from twisted.trial.unittest.TestCase.run\)', [
+                    Block(None),
+                ])
+            ]),
+        ]
+
+        singles = [
+            "^Warning: <type 'exceptions\.",
+            "^Warning: UID conflict detected: gobject",
+            "^Warning: UID conflict detected: __builtin__",
+            "^Warning: UID conflict detected: twisted",
+            ".*- pb.getObjectAt \(from twisted.spread.flavors.Root\)",
+            ".*- Deferred \(from twisted.trial.unittest.TestCase.run\)",
+        ]
+
+
+    f = Filter(sys.stdin, sys.stdout)
+
+    for s in starts:
+        f.addStart(s)
+
+    for s in singles:
+        reo = re.compile(s)
+        f.addRegExpObject(reo)
+
+    f.start()
+
+if __name__ == '__main__':
+    main()
