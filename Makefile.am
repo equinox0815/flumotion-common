@@ -9,7 +9,6 @@ EXTRA_DIST = \
 	changelog.mk 		\
 	common.mk 		\
 	epydoc.mk 		\
-	filterdoc.py 		\
 	gendoc.py 		\
 	locale.mk 		\
 	python.mk 		\
